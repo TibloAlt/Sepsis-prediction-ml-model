@@ -4,7 +4,7 @@ Early sepsis detection is one of the most time-sensitive problems in clinical me
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 - [Project Overview](#project-overview)
 - [Dataset](#dataset)
 - [Models](#models)
