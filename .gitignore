@@ -1,0 +1,27 @@
+# Data files — do NOT commit patient data to GitHub
+*.psv
+*.csv
+data/
+training_setA/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.env
+venv/
+.venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
