@@ -1,4 +1,4 @@
-# 🩺 Sepsis Prediction with Machine Learning
+# Sepsis Prediction with Machine Learning
 
 Early sepsis detection is one of the most time-sensitive problems in clinical medicine — delays in diagnosis significantly increase mortality. This project develops and evaluates three machine learning approaches for sepsis prediction using real physiological patient data, comparing a baseline configuration against targeted design improvements for each model type.
 
@@ -17,7 +17,11 @@ Early sepsis detection is one of the most time-sensitive problems in clinical me
 
 ## Project Overview
 
-This project was completed as part of a structured ML engineering course. Each of three model types was first implemented as a **baseline**, then modified with a specific **design decision** aimed at improving performance, efficiency, or clinical validity. Results were evaluated against pre-defined acceptance thresholds.
+This project was completed as part of a structured ML engineering course, in collaboration with a team of four. The team jointly developed shared baseline models and performed exploratory data analysis. Each team member then independently designed and evaluated one modification per model type.
+
+**This repository contains my individual contributions:** the three design decisions I was responsible for, alongside the shared baseline code. The full team report is included in `docs/` for context, edited to cover my sections only.
+
+Each model type was first implemented as a **baseline**, then modified with a specific **design decision** aimed at improving performance, efficiency, or clinical validity. Results were evaluated against pre-defined acceptance thresholds.
 
 **Three model types:**
 | Model | Task |
@@ -58,47 +62,34 @@ Features were selected using a combination of **correlation analysis** and **cli
 | Version | Design Decision | Result |
 |---|---|---|
 | Baseline | Standard OLS, row-level split | R² = 0.034 |
-| + Feature Scaling | StandardScaler applied | R² = 0.034 (no change) |
-| + Ridge Regularization (α=1.0) | L2 penalty to reduce overfitting | ✅ R² improved > 0.02 threshold |
-| + Lasso Regression | L1 regularization + feature selection | R² = 0.607, MSE = 88.46 |
-| + Patient-level Split | Prevents data leakage across patients | Higher MSE, more realistic evaluation |
+| **My contribution** → Ridge Regularization (α=1.0) | L2 penalty to reduce overfitting on correlated features | ✅ PASS — R² improved by > 0.02 threshold |
 
 ### 2. Random Forest Classifier (sepsis detection)
 
 | Version | Design Decision | Result |
 |---|---|---|
-| Baseline | 50 trees, default params | Recall (sepsis) ≈ 0.04–0.05 |
-| + Class Weighting | `class_weight='balanced'` | Recall = 0.06 |
-| + K-Fold CV (k=5) | More reliable evaluation | ✅ Recall improved to 0.10 |
-| + Threshold Lowering (0.3) | Prioritise sensitivity over precision | Recall = 0.16 |
-| + 75 Trees | Reduced variance via ensemble averaging | ✅ Higher F1-score than baseline |
+| Baseline | 50 trees, default params | Recall (sepsis) ≈ 0.04 |
+| **My contribution** → K-Fold Cross-Validation (k=5) | More reliable evaluation across data partitions | ✅ PASS — Recall improved from 0.04 to 0.10 |
 
 ### 3. MLP Neural Network (sepsis detection)
 
 | Version | Design Decision | Result |
 |---|---|---|
-| Baseline | 1 hidden layer (32 neurons), sigmoid, 100 iter | Recall (sepsis) ≈ 0 |
-| + Training Optimisation | LR=0.001, batch=64, early stopping | ✅ 25% fewer iterations; recall unchanged |
-| + ReLU Activation | Avoids vanishing gradient problem | Recall unchanged (class imbalance dominant) |
-| + Custom Threshold (0.2) | Increases sensitivity via `predict_proba` | Recall = 0.02 |
-| + Two Hidden Layers (32→16) | Captures more complex nonlinear patterns | ✅ Higher F1-score and recall |
+| Baseline | 1 hidden layer (32 neurons), sigmoid activation | Recall (sepsis) ≈ 0 |
+| **My contribution** → ReLU Activation | Avoids vanishing gradient; faster, more reliable learning | ❌ FAIL — Class imbalance dominated; recall unchanged |
 
 ---
 
 ## Results Summary
 
-The most consistent finding across all three model types was that **class imbalance was the dominant bottleneck**, not model complexity or hyperparameter choice. Models repeatedly defaulted to predicting the majority (non-sepsis) class, achieving high accuracy but near-zero recall on the clinically critical positive class.
+Two of my three design decisions met their acceptance thresholds. The consistent thread across all three was that **class imbalance was the dominant bottleneck** — models defaulted to predicting the majority (non-sepsis) class regardless of architectural changes.
 
 **What worked:**
-- Ridge regularization meaningfully improved regression stability
-- Patient-level splitting produced more honest (if lower) regression metrics
-- K-fold cross-validation improved evaluation reliability for the classifier
-- Two hidden layers in the neural network improved F1-score
+- Ridge regularization improved regression stability by distributing weight more evenly across correlated features, meeting the R² improvement threshold
+- K-fold cross-validation produced a more reliable and less variance-prone evaluation, with recall improving from 0.04 to 0.10 for the sepsis-positive class
 
 **What didn't:**
-- Feature scaling alone had no effect on linear regression performance
-- Threshold lowering and class weighting improved recall marginally but not to acceptable clinical thresholds
-- ReLU vs sigmoid made no difference when class imbalance wasn't addressed first
+- ReLU activation produced no improvement in recall — both sigmoid and ReLU models predicted zero sepsis-positive cases. The activation function was not the limiting factor; class imbalance was. Addressing it (via resampling or class-weighted loss) would be the correct next step
 
 ---
 
